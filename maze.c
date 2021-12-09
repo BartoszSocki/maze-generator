@@ -11,7 +11,6 @@ maze_t* maze_create_from_file(char* filename) {
 	size_t height, width;
 	fscanf(in, "%zd", &height);
 	fscanf(in, "%zd", &width);
-	/* printf("%zu %zu\n", height, width); */
 
 	maze_t* maze = malloc(sizeof(*maze));
 	maze->height = height;
@@ -21,21 +20,11 @@ maze_t* maze_create_from_file(char* filename) {
 
 	for(i = 0; i < maze->height; i++) {
 		maze->maze[i] = malloc(sizeof(**maze->maze) * maze->width);
-	}
-
-	for(i = 0; i < maze->height; i++) {
 		for(j = 0; j < maze->width; j++) {
 			fscanf(in, "%hd", &(maze->maze[i][j]));
 		}
 	}
-
-	for(i = 0; i < maze->height; i++) {
-		for(j = 0; j < maze->width; j++) {
-			printf("%d ", maze->maze[i][j]);
-		}
-		printf("\n");
-	}
-
 	fclose(in);
+	return maze;
 }
 
