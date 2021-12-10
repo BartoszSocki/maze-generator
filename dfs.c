@@ -13,10 +13,8 @@ void helper(graph_t* G, size_t node_beg, size_t node_end, double curr_value, dou
 	for(node_next = 0; node_next < G->N; node_next++) {
 		if((G->edge_exists[node_beg][node_next] == true) && (visited[node_next] == false)) {
 			visited[node_next] = true;
-			curr_value += G->E[node_beg][node_next];
-			helper(G, node_next, node_end, curr_value, min_value, visited);
+			helper(G, node_next, node_end, curr_value + G->E[node_beg][node_next], min_value, visited);
 			visited[node_next] = false;
-			curr_value -= G->E[node_beg][node_next];
 		}
 	}
 }
