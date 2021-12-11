@@ -63,12 +63,13 @@ void maze_print(maze_t* maze) {
 		putchar('\n');
 	}
 
-	for(i = 0; i < maze->height; i++) {
-		for(j = 0; j < maze->width; j++) {
-			printf("%2d ", maze->maze[i][j]);
-		}
-		printf("\n");
-	}
+	/* for printing raw format */
+	/* for(i = 0; i < maze->height; i++) { */
+	/* 	for(j = 0; j < maze->width; j++) { */
+	/* 		printf("%2d ", maze->maze[i][j]); */
+	/* 	} */
+	/* 	printf("\n"); */
+	/* } */
 	
 }
 
@@ -172,7 +173,6 @@ maze_t* maze_create(size_t height, size_t width, int seed) {
 
 	srand(seed);
 	maze_backtracker(maze, 0, 0);
-	maze_print(maze);
 	return maze;
 }
 
