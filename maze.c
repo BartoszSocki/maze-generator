@@ -9,33 +9,34 @@ double rand10() {
 	return rand() / (RAND_MAX / 10.0);
 }
 
-maze_t* maze_create_from_file(char* filename) {
-	int i, j;
-	FILE* in = fopen(filename, "r");
-	if(in == NULL)
-		return NULL;
+/* maze_t* maze_create_from_file(char* filename) { */
+/* 	int i, j; */
+/* 	FILE* in = fopen(filename, "r"); */
+/* 	if(in == NULL) */
+/* 		return NULL; */
 
-	size_t height, width;
-	fscanf(in, "%zd", &height);
-	fscanf(in, "%zd", &width);
+/* 	size_t height, width; */
+/* 	fscanf(in, "%zd", &height); */
+/* 	fscanf(in, "%zd", &width); */
 
-	maze_t* maze = malloc(sizeof(*maze));
-	maze->height = height;
-	maze->width = width;
+/* 	maze_t* maze = malloc(sizeof(*maze)); */
+/* 	maze->height = height; */
+/* 	maze->width = width; */
+/* 	maze->to_print = NULL; */
 
-	maze->maze = malloc(sizeof(*maze->maze) * maze->height);
+/* 	maze->maze = malloc(sizeof(*maze->maze) * maze->height); */
 
-	for(i = 0; i < maze->height; i++) {
-		maze->maze[i] = malloc(sizeof(**maze->maze) * maze->width);
-		for(j = 0; j < maze->width; j++) {
-			fscanf(in, "%d", &(maze->maze[i][j]));
-		}
-	}
-	fclose(in);
-	return maze;
-}
+/* 	for(i = 0; i < maze->height; i++) { */
+/* 		maze->maze[i] = malloc(sizeof(**maze->maze) * maze->width); */
+/* 		for(j = 0; j < maze->width; j++) { */
+/* 			fscanf(in, "%d", &(maze->maze[i][j])); */
+/* 		} */
+/* 	} */
+/* 	fclose(in); */
+/* 	return maze; */
+/* } */
 
-void maze_print(maze_t* maze) {
+void maze_create_graphical_reprezentation(maze_t* maze) {
 	int i, j;
 	short cell;
 	char** to_print = malloc(sizeof(*to_print) * (maze->height * 2 + 1));
@@ -55,22 +56,21 @@ void maze_print(maze_t* maze) {
 			to_print[i * 2 + 1][j * 2 + 1 - 1] = ((cell & W) != 0) ? '|' : ' ';
 		}
 	}
+	maze->to_print = to_print;
+}
+
+void maze_print(maze_t* maze) {
+	int i, j;
+	if(maze->to_print == NULL) {
+		maze_create_graphical_reprezentation(maze);
+	}
 
 	for(i = 0; i < maze->height * 2 + 1; i++) {
 		for(j = 0; j < maze->width * 2 + 1; j++) {
-			putchar(to_print[i][j]);
+			putchar(maze->to_print[i][j]);
 		}
 		putchar('\n');
 	}
-
-	/* for printing raw format */
-	/* for(i = 0; i < maze->height; i++) { */
-	/* 	for(j = 0; j < maze->width; j++) { */
-	/* 		printf("%2d ", maze->maze[i][j]); */
-	/* 	} */
-	/* 	printf("\n"); */
-	/* } */
-	
 }
 
 graph_t* maze_create_graph(maze_t* maze, int seed) {
@@ -156,11 +156,24 @@ void maze_backtracker(maze_t* maze, int ci, int cj) {
 	free(dirs);
 }
 
+void maze_remove_random_walls(maze_t* maze, int amount, int seed) {
+	int i;
+	static const dir_t dirs[] = {N, E, S, W};
+
+	srand(seed);
+	for(i = 0; i < amount; i++) {
+		int x = 1 + rand() % (maze->height - 2);
+		int y = 1 + rand() % (maze->width - 2);
+		maze->maze[x][y] &= ~dirs[rand() % 4];
+	}
+}
+
 maze_t* maze_create(size_t height, size_t width, int seed) {
 	int i, j;
 	maze_t* maze = malloc(sizeof(*maze));
 	maze->height = height;
 	maze->width = width;
+	maze->to_print = NULL;
 
 	maze->maze = malloc(sizeof(*maze->maze) * maze->height);
 
@@ -173,6 +186,7 @@ maze_t* maze_create(size_t height, size_t width, int seed) {
 
 	srand(seed);
 	maze_backtracker(maze, 0, 0);
+	maze_remove_random_walls(maze, height * width / 10, seed);
 	return maze;
 }
 
