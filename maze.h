@@ -12,7 +12,7 @@ typedef struct {
 	size_t width;
 
 	char** maze;
-	char** to_print;
+	wchar_t** to_print;
 } maze_t;
 
 /* maze_t* maze_create_from_file(char* filename); */

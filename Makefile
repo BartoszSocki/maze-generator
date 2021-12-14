@@ -1,4 +1,4 @@
-CC = cc -std=c89 -pedantic -Wall
+CC = cc
 
 compile: main.c maze.c maze.h graph.c graph.h dfs.c dfs.h
 	$(CC) main.c maze.c graph.c dfs.c

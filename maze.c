@@ -1,5 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
+#include<wchar.h>
+#include<locale.h>
 #include"maze.h"
 #include"graph.h"
 
@@ -36,24 +38,36 @@ double rand10() {
 /* 	return maze; */
 /* } */
 
+wchar_t get_wall(maze_t* maze, int i, int j) {
+	static const wchar_t walls[] = {L'╹', L'', L'', L'', L'', L'', L'', L'',L'', L'', L'', L'', L'', L'', L'', L''};
+	char wall = 0;
+	wall |= (i <= 0 || maze->maze[i - 1][j]) ? N : 0;
+	wall |= (i >= (maze->height - 1) || maze->maze[i + 1][j]) ? S : 0;
+	wall |= (j <= 0 || maze->maze[i][j - 1]) ? W : 0;
+	wall |= (j >= (maze->width - 1) || maze->maze[i][j + 1]) ? E : 0;
+
+	return walls[wall];
+}
+
 void maze_create_graphical_reprezentation(maze_t* maze) {
 	int i, j;
 	short cell;
-	char** to_print = malloc(sizeof(*to_print) * (maze->height * 2 + 1));
+	wchar_t** to_print = malloc(sizeof(*to_print) * (maze->height * 2 + 1));
 	for(i = 0; i < maze->height * 2 + 1; i++) {
 		to_print[i] = malloc(sizeof(**to_print) * (maze->width * 2 + 1));
 		for(j = 0; j < maze->width * 2 + 1; j++) {
-			to_print[i][j] = ((i % 2 == 0) && (j % 2 == 0)) ? '+' : ' ';
+			to_print[i][j] = L' ';
+			/* to_print[i][j] = ((i % 2 == 0) && (j % 2 == 0)) ? '+' : ' '; */
 		}
 	}
 
 	for(i = 0; i < maze->height; i++) {
 		for(j = 0; j < maze->width; j++) {
 			cell = maze->maze[i][j];
-			to_print[i * 2 + 1 - 1][j * 2 + 1] = ((cell & N) != 0) ? '-' : ' ';
-			to_print[i * 2 + 1 + 1][j * 2 + 1] = ((cell & S) != 0) ? '-' : ' ';
-			to_print[i * 2 + 1][j * 2 + 1 + 1] = ((cell & E) != 0) ? '|' : ' ';
-			to_print[i * 2 + 1][j * 2 + 1 - 1] = ((cell & W) != 0) ? '|' : ' ';
+			to_print[i * 2 + 1 - 1][j * 2 + 1] = ((cell & N) != 0) ? L'-' : L' ';
+			to_print[i * 2 + 1 + 1][j * 2 + 1] = ((cell & S) != 0) ? L'-' : L' ';
+			to_print[i * 2 + 1][j * 2 + 1 + 1] = ((cell & E) != 0) ? L'|' : L' ';
+			to_print[i * 2 + 1][j * 2 + 1 - 1] = ((cell & W) != 0) ? L'|' : L' ';
 		}
 	}
 	maze->to_print = to_print;
@@ -65,9 +79,10 @@ void maze_print(maze_t* maze) {
 		maze_create_graphical_reprezentation(maze);
 	}
 
+	setlocale(LC_CTYPE, "UTF-8");
 	for(i = 0; i < maze->height * 2 + 1; i++) {
 		for(j = 0; j < maze->width * 2 + 1; j++) {
-			putchar(maze->to_print[i][j]);
+			putwchar(maze->to_print[i][j]);
 		}
 		putchar('\n');
 	}
