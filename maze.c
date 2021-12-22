@@ -5,38 +5,12 @@
 #include"maze.h"
 #include"graph.h"
 
+/* wszystkie ściany zamnkięte */
 #define BLANK 15
 
 double rand10() {
 	return rand() / (RAND_MAX / 10.0);
 }
-
-/* maze_t* maze_create_from_file(char* filename) { */
-/* 	int i, j; */
-/* 	FILE* in = fopen(filename, "r"); */
-/* 	if(in == NULL) */
-/* 		return NULL; */
-
-/* 	size_t height, width; */
-/* 	fscanf(in, "%zd", &height); */
-/* 	fscanf(in, "%zd", &width); */
-
-/* 	maze_t* maze = malloc(sizeof(*maze)); */
-/* 	maze->height = height; */
-/* 	maze->width = width; */
-/* 	maze->to_print = NULL; */
-
-/* 	maze->maze = malloc(sizeof(*maze->maze) * maze->height); */
-
-/* 	for(i = 0; i < maze->height; i++) { */
-/* 		maze->maze[i] = malloc(sizeof(**maze->maze) * maze->width); */
-/* 		for(j = 0; j < maze->width; j++) { */
-/* 			fscanf(in, "%d", &(maze->maze[i][j])); */
-/* 		} */
-/* 	} */
-/* 	fclose(in); */
-/* 	return maze; */
-/* } */
 
 wchar_t get_wall(maze_t* maze, int i, int j) {
 	static const wchar_t walls[] = {L' ', L'┃', L'━', L'┗', L'┃', L'┃', L'┏', L'┣', L'━', L'┛', L'━', L'┻', L'┓', L'┫', L'┳', L'╋'};
@@ -90,6 +64,7 @@ void maze_create_graphical_reprezentation(maze_t* maze) {
 
 void maze_print(maze_t* maze) {
 	int i, j;
+	/* jeżeli graficzna reprezentacja labiryntu jeszcze nie istnieje */
 	if(maze->to_print == NULL) {
 		maze_create_graphical_reprezentation(maze);
 	}
@@ -108,31 +83,31 @@ graph_t* maze_create_graph(maze_t* maze, int seed) {
 	short cell;
 	graph_t* G = graph_create(maze->height * maze->width);
 
+	/* dla wag */
 	srand(seed);
 	for(i = 0; i < maze->height; i++) {
 		for(j = 0; j < maze->width; j++) {
 			cell = maze->maze[i][j];
+			from = i * maze->width + j;
+			/* jeżeli ściana północna jest otwarta */
 			if((cell & N) == 0) {
-				from = i * maze->width + j;
-				to   = (i - 1) * maze->width + j;
+				/* oblicz numer węzłu sąsiada */
+				to = (i - 1) * maze->width + j;
 				graph_add_edge(G, from, to, rand10());
 			}
 
 			if((cell & S) == 0) {
-				from = i * maze->width + j;
-				to   = (i + 1) * maze->width + j;
+				to = (i + 1) * maze->width + j;
 				graph_add_edge(G, from, to, rand10());
 			}
 
 			if((cell & E) == 0) {
-				from = i * maze->width + j;
-				to   = i * maze->width + j + 1;
+				to = i * maze->width + j + 1;
 				graph_add_edge(G, from, to, rand10());
 			}
 			
 			if((cell & W) == 0) {
-				from = i * maze->width + j;
-				to   = i * maze->width + j - 1;
+				to = i * maze->width + j - 1;
 				graph_add_edge(G, from, to, rand10());
 			}
 		}
@@ -209,9 +184,11 @@ void maze_remove_random_walls(maze_t* maze, int amount, int seed) {
 
 maze_t* maze_create(size_t height, size_t width, int seed) {
 	int i, j;
+	/* stwórz miejsce i zapisz wartości w labiryncie */
 	maze_t* maze = malloc(sizeof(*maze));
 	maze->height = height;
 	maze->width = width;
+	/* dopiero przy pierwszym wywołaniu maze_print ta wartość jest inicjalizowana */
 	maze->to_print = NULL;
 
 	maze->maze = malloc(sizeof(*maze->maze) * maze->height);
@@ -225,6 +202,7 @@ maze_t* maze_create(size_t height, size_t width, int seed) {
 
 	srand(seed);
 	maze_backtracker(maze, 0, 0);
+	/* dla 10% komórek ta funkcja zostanie wywołana, nie oznacza to jednak że zniknie 10% ścian */
 	maze_remove_random_walls(maze, (int)(height * width / 10.0), seed);
 	return maze;
 }
