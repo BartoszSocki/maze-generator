@@ -39,12 +39,26 @@ double rand10() {
 /* } */
 
 wchar_t get_wall(maze_t* maze, int i, int j) {
-	static const wchar_t walls[] = {L'╹', L'', L'', L'', L'', L'', L'', L'',L'', L'', L'', L'', L'', L'', L'', L''};
+	static const wchar_t walls[] = {L' ', L'┃', L'━', L'┗', L'┃', L'┃', L'┏', L'┣', L'━', L'┛', L'━', L'┻', L'┓', L'┫', L'┳', L'╋'};
 	char wall = 0;
-	wall |= (i <= 0 || maze->maze[i - 1][j]) ? N : 0;
-	wall |= (i >= (maze->height - 1) || maze->maze[i + 1][j]) ? S : 0;
-	wall |= (j <= 0 || maze->maze[i][j - 1]) ? W : 0;
-	wall |= (j >= (maze->width - 1) || maze->maze[i][j + 1]) ? E : 0;
+
+	char left_up    = (i > 0 && j > 0) ? maze->maze[i - 1][j - 1] : 0;
+	char right_up   = (i > 0 && j < maze->width) ? maze->maze[i - 1][j] : 0;
+	char left_down  = (i < maze->height && j > 0) ? maze->maze[i][j - 1] : 0;
+	char right_down = (i < maze->height && j < maze->width) ? maze->maze[i][j] : 0;
+
+	/* naprawde chcialbym tego nigdy nie napisac */
+	wall |= ((left_up & S) != 0) ? W : 0;
+	wall |= ((left_up & E) != 0) ? N : 0;
+
+	wall |= ((right_up & W) != 0) ? N : 0;
+	wall |= ((right_up & S) != 0) ? E : 0;
+
+	wall |= ((left_down & E) != 0) ? S : 0;
+	wall |= ((left_down & N) != 0) ? W : 0;
+
+	wall |= ((right_down & N) != 0) ? E : 0;
+	wall |= ((right_down & W) != 0) ? S : 0;
 
 	return walls[wall];
 }
@@ -57,17 +71,18 @@ void maze_create_graphical_reprezentation(maze_t* maze) {
 		to_print[i] = malloc(sizeof(**to_print) * (maze->width * 2 + 1));
 		for(j = 0; j < maze->width * 2 + 1; j++) {
 			to_print[i][j] = L' ';
-			/* to_print[i][j] = ((i % 2 == 0) && (j % 2 == 0)) ? '+' : ' '; */
+			if(i % 2 == 0 && j % 2 == 0)
+				to_print[i][j] = get_wall(maze, i / 2, j / 2);
 		}
 	}
 
 	for(i = 0; i < maze->height; i++) {
 		for(j = 0; j < maze->width; j++) {
 			cell = maze->maze[i][j];
-			to_print[i * 2 + 1 - 1][j * 2 + 1] = ((cell & N) != 0) ? L'-' : L' ';
-			to_print[i * 2 + 1 + 1][j * 2 + 1] = ((cell & S) != 0) ? L'-' : L' ';
-			to_print[i * 2 + 1][j * 2 + 1 + 1] = ((cell & E) != 0) ? L'|' : L' ';
-			to_print[i * 2 + 1][j * 2 + 1 - 1] = ((cell & W) != 0) ? L'|' : L' ';
+			to_print[i * 2 + 1 - 1][j * 2 + 1] = ((cell & N) != 0) ? L'━' : L' ';
+			to_print[i * 2 + 1 + 1][j * 2 + 1] = ((cell & S) != 0) ? L'━' : L' ';
+			to_print[i * 2 + 1][j * 2 + 1 + 1] = ((cell & E) != 0) ? L'┃' : L' ';
+			to_print[i * 2 + 1][j * 2 + 1 - 1] = ((cell & W) != 0) ? L'┃' : L' ';
 		}
 	}
 	maze->to_print = to_print;
@@ -172,14 +187,23 @@ void maze_backtracker(maze_t* maze, int ci, int cj) {
 }
 
 void maze_remove_random_walls(maze_t* maze, int amount, int seed) {
+	if(maze->height < 3 || maze->width < 3) return;
 	int i;
 	static const dir_t dirs[] = {N, E, S, W};
+	static const int di[] = {-1, 0, 0, 1, 0, 0, 0, 0};
+	static const int dj[] = {0, 1, 0, 0, 0, 0, 0, -1};
 
 	srand(seed);
 	for(i = 0; i < amount; i++) {
-		int x = 1 + rand() % (maze->height - 2);
-		int y = 1 + rand() % (maze->width - 2);
-		maze->maze[x][y] &= ~dirs[rand() % 4];
+		dir_t dir = dirs[rand() % 4];
+		int ci = 1 + rand() % (maze->height - 2);
+		int cj = 1 + rand() % (maze->width - 2);
+		int ni = ci + di[dir - 1];
+		int nj = cj + dj[dir - 1];
+
+		/* nie można użyć xora, bo zamykalibyśmy otwarte */ 
+		maze->maze[ci][cj] &= ~dir;
+		maze->maze[ni][nj] &= ~opposite(dir);
 	}
 }
 
@@ -201,8 +225,6 @@ maze_t* maze_create(size_t height, size_t width, int seed) {
 
 	srand(seed);
 	maze_backtracker(maze, 0, 0);
-	maze_remove_random_walls(maze, height * width / 10, seed);
+	maze_remove_random_walls(maze, (int)(height * width / 10.0), seed);
 	return maze;
 }
-
-
