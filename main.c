@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
 	for(i = 0; i < min_path_length; i++) {
 		int x = 2 * (min_path[i] / maze->width) + 1;
 		int y = 2 * (min_path[i] % maze->width) + 1;
-		printf(" -> [%d, %d]", min_path[i] / maze->width, min_path[i] % maze->width);
+		printf(" -> [%lu, %lu]", min_path[i] / maze->width, min_path[i] % maze->width);
 		maze->to_print[x][y] = '@';
 	}
 	printf("\n");
