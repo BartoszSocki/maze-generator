@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
 
 	printf("length of the shortest path:\n%lf\n", ans);
 
-	/* zaznaczenie drogi */
+	/* marking beginning of path */
 	printf("path: \n");
 	printf("[0,0]");
 	for(i = 0; i < min_path_length; i++) {
@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
 	}
 	printf("\n");
 
-	/* oznaczenie komórki końcowej i początkowej */
+	/* marking start & end maze calls */
 	maze->to_print[1][1] = 'S';
 	maze->to_print[2 * maze->height - 1][2 * maze->width - 1] = 'E';
 

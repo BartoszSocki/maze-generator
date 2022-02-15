@@ -5,7 +5,6 @@
 
 graph_t* graph_create(size_t N) {
 	int i, j;
-	/* stworzenie miejsca i zapisanie danych */
 	graph_t* G = malloc(sizeof(graph_t));
 	G->N = N;
 	G->E = malloc((G->N) * sizeof(*(G->E)));
@@ -25,7 +24,7 @@ graph_t* graph_create(size_t N) {
 	return G;
 }
 
-/* zwraca true jeżeli krawędź jeszcze nie istniała */
+/* returns true if edge did not exist */
 bool graph_add_edge(graph_t* G, int from, int to, double weight) {
 	if(G->edge_exists[from][to] == false) {
 		G->E[from][to] = weight;
@@ -46,7 +45,7 @@ void graph_free(graph_t** G) {
 	(*G) = NULL;
 }
 
-/* przydaje się podczas debugowania */
+/* useful when debuging */
 void graph_print(graph_t* G) {
 	int i, j;
 	for(i = 0; i < G->N; i++) {

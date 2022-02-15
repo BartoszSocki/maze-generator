@@ -5,7 +5,7 @@
 #include"maze.h"
 #include"graph.h"
 
-/* wszystkie ściany zamnkięte */
+/* all walls closed */
 #define BLANK 15
 
 double rand10() {
@@ -21,7 +21,7 @@ wchar_t get_wall(maze_t* maze, int i, int j) {
 	char left_down  = (i < maze->height && j > 0) ? maze->maze[i][j - 1] : 0;
 	char right_down = (i < maze->height && j < maze->width) ? maze->maze[i][j] : 0;
 
-	/* naprawde chcialbym tego nigdy nie napisac */
+	/* god forbid me that I didn't comment this code */
 	wall |= ((left_up & S) != 0) ? W : 0;
 	wall |= ((left_up & E) != 0) ? N : 0;
 
@@ -64,7 +64,7 @@ void maze_create_graphical_reprezentation(maze_t* maze) {
 
 void maze_print(maze_t* maze) {
 	int i, j;
-	/* jeżeli graficzna reprezentacja labiryntu jeszcze nie istnieje */
+	/* check if graphic representation of maze exists */
 	if(maze->to_print == NULL) {
 		maze_create_graphical_reprezentation(maze);
 	}
@@ -83,15 +83,15 @@ graph_t* maze_create_graph(maze_t* maze, int seed) {
 	short cell;
 	graph_t* G = graph_create(maze->height * maze->width);
 
-	/* dla wag */
+	/* wages on nodes */
 	srand(seed);
 	for(i = 0; i < maze->height; i++) {
 		for(j = 0; j < maze->width; j++) {
 			cell = maze->maze[i][j];
 			from = i * maze->width + j;
-			/* jeżeli ściana północna jest otwarta */
+			/* if north wall is opened */
 			if((cell & N) == 0) {
-				/* oblicz numer węzłu sąsiada */
+				/* calculate neighbour node */
 				to = (i - 1) * maze->width + j;
 				graph_add_edge(G, from, to, rand10());
 			}
@@ -176,7 +176,7 @@ void maze_remove_random_walls(maze_t* maze, int amount, int seed) {
 		int ni = ci + di[dir - 1];
 		int nj = cj + dj[dir - 1];
 
-		/* nie można użyć xora, bo zamykalibyśmy otwarte */ 
+		/* xor won't work */
 		maze->maze[ci][cj] &= ~dir;
 		maze->maze[ni][nj] &= ~opposite(dir);
 	}
@@ -184,11 +184,9 @@ void maze_remove_random_walls(maze_t* maze, int amount, int seed) {
 
 maze_t* maze_create(size_t height, size_t width, int seed) {
 	int i, j;
-	/* stwórz miejsce i zapisz wartości w labiryncie */
 	maze_t* maze = malloc(sizeof(*maze));
 	maze->height = height;
 	maze->width = width;
-	/* dopiero przy pierwszym wywołaniu maze_print ta wartość jest inicjalizowana */
 	maze->to_print = NULL;
 
 	maze->maze = malloc(sizeof(*maze->maze) * maze->height);
@@ -202,7 +200,7 @@ maze_t* maze_create(size_t height, size_t width, int seed) {
 
 	srand(seed);
 	maze_backtracker(maze, 0, 0);
-	/* dla 10% komórek ta funkcja zostanie wywołana, nie oznacza to jednak że zniknie 10% ścian */
+	/* try openinig 10% off all walls, not guarantee that this will work */
 	maze_remove_random_walls(maze, (int)(height * width / 10.0), seed);
 	return maze;
 }
